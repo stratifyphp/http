@@ -48,6 +48,6 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
 
         $app = new Application($middleware, $responseEmitter);
         $response = $app->handle($request);
-        $this->assertEquals('Hello world', $response->getBody()->__toString());
+        $this->assertEquals('Hello world!', $response->getBody()->__toString());
     }
 }
