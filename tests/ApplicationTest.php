@@ -17,6 +17,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
     {
         $middleware = function (ServerRequestInterface $req, ResponseInterface $res, callable $next) {
             $res->getBody()->write('Hello world!');
+            return $res;
         };
 
         $responseEmitter = $this->prophesize('Zend\Diactoros\Response\EmitterInterface');
@@ -39,6 +40,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
 
         $middleware = function (ServerRequestInterface $req, ResponseInterface $res, callable $next) {
             $res->getBody()->write('Hello world!');
+            return $res;
         };
 
         /** @var EmitterInterface $responseEmitter */
