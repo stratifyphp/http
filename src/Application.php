@@ -8,6 +8,7 @@ use Stratify\Http\Exception\HttpNotFound;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\EmitterInterface;
+use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
 
 class Application
@@ -22,10 +23,10 @@ class Application
      */
     private $responseEmitter;
 
-    public function __construct(callable $middleware, EmitterInterface $responseEmitter)
+    public function __construct(callable $middleware, EmitterInterface $responseEmitter = null)
     {
         $this->middleware = $middleware;
-        $this->responseEmitter = $responseEmitter;
+        $this->responseEmitter = $responseEmitter ?: new SapiEmitter();
     }
 
     /**
