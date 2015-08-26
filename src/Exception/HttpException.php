@@ -2,6 +2,11 @@
 
 namespace Stratify\Http\Exception;
 
+/**
+ * An exception that represents a HTTP error response.
+ *
+ * @author Matthieu Napoli <matthieu@mnapoli.fr>
+ */
 class HttpException extends \Exception
 {
     private $statusCode;

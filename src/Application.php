@@ -11,6 +11,11 @@ use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
 
+/**
+ * An HTTP application emits a response for the current request.
+ *
+ * @author Matthieu Napoli <matthieu@mnapoli.fr>
+ */
 class Application
 {
     /**
