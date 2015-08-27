@@ -39,9 +39,9 @@ class Application
      *
      * @see handle() to handle an HTTP request and not write the response to the output.
      */
-    public function run()
+    public function run(ServerRequestInterface $request = null)
     {
-        $request = ServerRequestFactory::fromGlobals();
+        $request = $request ?: ServerRequestFactory::fromGlobals();
 
         $response = $this->handle($request);
 
