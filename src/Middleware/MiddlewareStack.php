@@ -2,8 +2,10 @@
 
 namespace Stratify\Http\Middleware;
 
+use Invoker\InvokerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Stratify\Http\Middleware\Invoker\SimpleInvoker;
 
 /**
  * Stacks middlewares to call them in order.
@@ -19,9 +21,15 @@ class MiddlewareStack implements Middleware
      */
     private $middlewares;
 
-    public function __construct(array $middlewares)
+    /**
+     * @var InvokerInterface
+     */
+    private $invoker;
+
+    public function __construct(array $middlewares, InvokerInterface $invoker = null)
     {
         $this->middlewares = $middlewares;
+        $this->invoker = $invoker ?: new SimpleInvoker;
     }
 
     public function __invoke(
@@ -32,7 +40,11 @@ class MiddlewareStack implements Middleware
     {
         foreach (array_reverse($this->middlewares) as $middleware) {
             $next = function (ServerRequestInterface $request, ResponseInterface $response) use ($middleware, $next) {
-                return $middleware($request, $response, $next);
+                return $this->invoker->call($middleware, [
+                    'request' => $request,
+                    'response' => $response,
+                    'next' => $next,
+                ]);
             };
         }
 
