@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Application;
 use Stratify\Http\Test\Mock\FakeEmitter;
+use Stratify\Http\Test\Mock\FakeInvoker;
 
 class ApplicationTest extends \PHPUnit_Framework_TestCase
 {
@@ -42,5 +43,25 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
         $app = new Application($middleware, null, new FakeEmitter);
         $response = $app->handle($request);
         $this->assertEquals('Hello world!', $response->getBody()->__toString());
+    }
+
+    /**
+     * @test
+     */
+    public function invokes_middleware_using_the_invoker()
+    {
+        $invoker = new FakeInvoker([
+            // parameters are reversed in FakeInvoker
+            'foo' => function (callable $next, ResponseInterface $res, ServerRequestInterface $req) {
+                $res->getBody()->write('Hello world!');
+                return $res;
+            },
+        ]);
+
+        $responseEmitter = new FakeEmitter;
+        $app = new Application('foo', $invoker, $responseEmitter);
+        $app->run();
+
+        $this->assertEquals('Hello world!', $responseEmitter->output);
     }
 }

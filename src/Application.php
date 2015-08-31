@@ -21,7 +21,7 @@ use Zend\Diactoros\ServerRequestFactory;
 class Application
 {
     /**
-     * @var callable
+     * @var mixed
      */
     private $middleware;
 
@@ -35,7 +35,7 @@ class Application
      */
     private $responseEmitter;
 
-    public function __construct(callable $middleware, MiddlewareInvoker $invoker = null, EmitterInterface $responseEmitter = null)
+    public function __construct($middleware, MiddlewareInvoker $invoker = null, EmitterInterface $responseEmitter = null)
     {
         $this->middleware = $middleware;
         $this->invoker = $invoker ?: new SimpleInvoker;
