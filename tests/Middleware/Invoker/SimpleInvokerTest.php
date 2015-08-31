@@ -4,6 +4,7 @@ namespace Stratify\Http\Test\Middleware\Invoker;
 
 use Stratify\Http\Middleware\Invoker\SimpleInvoker;
 use Zend\Diactoros\Response;
+use Zend\Diactoros\Response\EmptyResponse;
 use Zend\Diactoros\ServerRequest;
 
 class SimpleInvokerTest extends \PHPUnit_Framework_TestCase
@@ -11,13 +12,14 @@ class SimpleInvokerTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function passes_request_and_response()
+    public function passes_middleware_parameters()
     {
         $request = new ServerRequest;
         $response = new Response;
 
         $calls = 0;
-        $callable = function () use (&$calls, $request, $response) {
+        $expectedResponse = new EmptyResponse;
+        $callable = function () use (&$calls, $request, $response, $expectedResponse) {
             $calls++;
 
             $args = func_get_args();
@@ -26,16 +28,14 @@ class SimpleInvokerTest extends \PHPUnit_Framework_TestCase
             $this->assertSame($request, $args[0]);
             $this->assertSame($response, $args[1]);
             $this->assertTrue(is_callable($args[2]));
+
+            return $expectedResponse;
         };
 
         $invoker = new SimpleInvoker;
-        $invoker->call($callable, [
-            'request'  => $request,
-            'response' => $response,
-            'next'     => function () {},
-            'foo'      => 'bar', // extra param that will be ignored
-        ]);
+        $actualResponse = $invoker->invoke($callable, $request, $response, function () {});
 
         $this->assertEquals(1, $calls);
+        $this->assertSame($expectedResponse, $actualResponse);
     }
 }

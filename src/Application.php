@@ -5,6 +5,8 @@ namespace Stratify\Http;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Exception\HttpNotFound;
+use Stratify\Http\Middleware\Invoker\MiddlewareInvoker;
+use Stratify\Http\Middleware\Invoker\SimpleInvoker;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\EmitterInterface;
@@ -24,13 +26,19 @@ class Application
     private $middleware;
 
     /**
+     * @var MiddlewareInvoker
+     */
+    private $invoker;
+
+    /**
      * @var EmitterInterface
      */
     private $responseEmitter;
 
-    public function __construct(callable $middleware, EmitterInterface $responseEmitter = null)
+    public function __construct(callable $middleware, MiddlewareInvoker $invoker = null, EmitterInterface $responseEmitter = null)
     {
         $this->middleware = $middleware;
+        $this->invoker = $invoker ?: new SimpleInvoker;
         $this->responseEmitter = $responseEmitter ?: new SapiEmitter();
     }
 
@@ -57,12 +65,11 @@ class Application
      */
     public function handle(ServerRequestInterface $request) : ResponseInterface
     {
-        // Leaf middleware: page not found
+        // Leaf middleware: resource not found
         $leaf = function () {
             throw new HttpNotFound;
         };
 
-        $middleware = $this->middleware;
-        return $middleware($request, new Response, $leaf);
+        return $this->invoker->invoke($this->middleware, $request, new Response, $leaf);
     }
 }

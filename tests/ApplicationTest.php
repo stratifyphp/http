@@ -2,11 +2,10 @@
 
 namespace Stratify\Http\Test;
 
-use Prophecy\Argument;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Application;
-use Zend\Diactoros\Response\EmitterInterface;
+use Stratify\Http\Test\Mock\FakeEmitter;
 
 class ApplicationTest extends \PHPUnit_Framework_TestCase
 {
@@ -20,14 +19,11 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
             return $res;
         };
 
-        $responseEmitter = $this->prophesize('Zend\Diactoros\Response\EmitterInterface');
-        $responseEmitter->emit(Argument::that(function (ResponseInterface $response) {
-            $this->assertEquals('Hello world!', $response->getBody()->__toString());
-        }));
-        $responseEmitter = $responseEmitter->reveal();
-
-        $app = new Application($middleware, $responseEmitter);
+        $responseEmitter = new FakeEmitter;
+        $app = new Application($middleware, null, $responseEmitter);
         $app->run();
+
+        $this->assertEquals('Hello world!', $responseEmitter->output);
     }
 
     /**
@@ -43,10 +39,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
             return $res;
         };
 
-        /** @var EmitterInterface $responseEmitter */
-        $responseEmitter = $this->getMockForAbstractClass('Zend\Diactoros\Response\EmitterInterface');
-
-        $app = new Application($middleware, $responseEmitter);
+        $app = new Application($middleware, null, new FakeEmitter);
         $response = $app->handle($request);
         $this->assertEquals('Hello world!', $response->getBody()->__toString());
     }

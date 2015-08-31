@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Middleware\MiddlewareStack;
 use Stratify\Http\Test\Mock\FakeContainer;
+use Stratify\Http\Test\Mock\FakeInvoker;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 
@@ -49,19 +50,17 @@ class MiddlewareStackTest extends \PHPUnit_Framework_TestCase
             return $res;
         };
 
-        $container = new FakeContainer([
-            // Standard parameter order
-            'first'  => function (ServerRequestInterface $request, ResponseInterface $response, callable $next) {
+        // The fake invoker passes the middleware parameters in the reverse order (for testing)
+        $invoker = new FakeInvoker([
+            'first'  => function (callable $next, ResponseInterface $response, ServerRequestInterface $request) {
                 $response->getBody()->write('Hello');
                 return $next($request, $response);
             },
-            // Different parameter order
             'second' => function (callable $next, ResponseInterface $response, ServerRequestInterface $request) {
                 $response->getBody()->write(' world');
                 return $next($request, $response);
             },
         ]);
-        $invoker = new Invoker(new AssociativeArrayResolver, $container);
 
         $stack = new MiddlewareStack([
             'first',
