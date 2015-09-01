@@ -8,13 +8,13 @@ use Stratify\Http\Middleware\Invoker\MiddlewareInvoker;
 use Stratify\Http\Middleware\Invoker\SimpleInvoker;
 
 /**
- * Stacks middlewares to call them in order.
+ * Pipes middlewares to call them in order.
  *
  * This is also a middleware so that it can be used like any other middleware.
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class MiddlewareStack implements Middleware
+class MiddlewarePipe implements Middleware
 {
     /**
      * @var Middleware[]
