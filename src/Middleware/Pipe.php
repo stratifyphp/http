@@ -15,7 +15,7 @@ use Stratify\Http\Middleware\Invoker\SimpleInvoker;
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class MiddlewarePipe implements Middleware, HasSubMiddlewares
+class Pipe implements Middleware, HasSubMiddlewares
 {
     /**
      * @var Middleware[]

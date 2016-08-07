@@ -5,12 +5,12 @@ namespace Stratify\Http\Test\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Stratify\Http\Middleware\MiddlewarePipe;
+use Stratify\Http\Middleware\Pipe;
 use Stratify\Http\Test\Mock\FakeInvoker;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 
-class MiddlewarePipeTest extends \PHPUnit_Framework_TestCase
+class PipeTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @test
@@ -22,7 +22,7 @@ class MiddlewarePipeTest extends \PHPUnit_Framework_TestCase
             return $res;
         };
 
-        $pipe = new MiddlewarePipe([
+        $pipe = new Pipe([
             function ($req, ResponseInterface $res, callable $next) {
                 $res->getBody()->write('Hello');
                 return $next($req, $res);
@@ -60,7 +60,7 @@ class MiddlewarePipeTest extends \PHPUnit_Framework_TestCase
             },
         ]);
 
-        $pipe = new MiddlewarePipe([
+        $pipe = new Pipe([
             'first',
             'second',
         ], $invoker);
