@@ -47,4 +47,9 @@ class MiddlewarePipe implements Middleware
         // Invoke the root middleware
         return $next($request, $response);
     }
+
+    public function setInvoker(MiddlewareInvoker $invoker)
+    {
+        $this->invoker = $invoker;
+    }
 }
