@@ -15,7 +15,7 @@ use Stratify\Http\Middleware\Invoker\SimpleInvoker;
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class Pipe implements Middleware, HasSubMiddlewares
+class Pipe implements Middleware
 {
     /**
      * @var Middleware[]
@@ -47,15 +47,5 @@ class Pipe implements Middleware, HasSubMiddlewares
 
         // Invoke the root middleware
         return $next($request, $response);
-    }
-
-    public function setInvoker(MiddlewareInvoker $invoker)
-    {
-        $this->invoker = $invoker;
-    }
-
-    public function getSubMiddlewares() : array
-    {
-        return $this->middlewares;
     }
 }
