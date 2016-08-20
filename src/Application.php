@@ -8,7 +8,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Exception\HttpNotFound;
 use Stratify\Http\Middleware\Invoker\MiddlewareInvoker;
 use Stratify\Http\Middleware\Invoker\SimpleInvoker;
-use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
@@ -70,6 +69,6 @@ class Application
             throw new HttpNotFound;
         };
 
-        return $this->invoker->invoke($this->middleware, $request, new Response, $leaf);
+        return $this->invoker->invoke($this->middleware, $request, $leaf);
     }
 }

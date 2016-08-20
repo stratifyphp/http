@@ -19,9 +19,5 @@ interface Middleware
      * The `$next` callable can optionally be called (e.g. if the middleware cannot
      * handle the current request).
      */
-    public function __invoke(
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        callable $next
-    ) : ResponseInterface;
+    public function __invoke(ServerRequestInterface $request, callable $next) : ResponseInterface;
 }

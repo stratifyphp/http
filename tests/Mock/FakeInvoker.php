@@ -19,14 +19,9 @@ class FakeInvoker implements MiddlewareInvoker
         $this->entries = $entries;
     }
 
-    public function invoke(
-        $middleware,
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        callable $next
-    ) : ResponseInterface
+    public function invoke($middleware, ServerRequestInterface $request, callable $next) : ResponseInterface
     {
         // Calls with the parameters reversed
-        return call_user_func($this->entries[$middleware], $next, $response, $request);
+        return call_user_func($this->entries[$middleware], $next, $request);
     }
 }

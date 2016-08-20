@@ -14,17 +14,12 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class SimpleInvoker implements MiddlewareInvoker
 {
-    public function invoke(
-        $middleware,
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        callable $next
-    ) : ResponseInterface
+    public function invoke($middleware, ServerRequestInterface $request, callable $next) : ResponseInterface
     {
         if (! is_callable($middleware)) {
             throw new \Exception('The middleware is not callable');
         }
 
-        return call_user_func($middleware, $request, $response, $next);
+        return call_user_func($middleware, $request, $next);
     }
 }

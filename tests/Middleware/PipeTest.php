@@ -3,11 +3,10 @@ declare(strict_types = 1);
 
 namespace Stratify\Http\Test\Middleware;
 
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Middleware\Pipe;
+use Stratify\Http\Response\SimpleResponse;
 use Stratify\Http\Test\Mock\FakeInvoker;
-use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 
 class PipeTest extends \PHPUnit_Framework_TestCase
@@ -17,25 +16,26 @@ class PipeTest extends \PHPUnit_Framework_TestCase
      */
     public function calls_middlewares_in_correct_order()
     {
-        $leaf = function ($req, ResponseInterface $res) {
-            $res->getBody()->write('!');
-            return $res;
+        $leaf = function () {
+            return new SimpleResponse('Hello');
         };
 
         $pipe = new Pipe([
-            function ($req, ResponseInterface $res, callable $next) {
-                $res->getBody()->write('Hello');
-                return $next($req, $res);
+            function (ServerRequestInterface $request, callable $next) {
+                $response = $next($request);
+                $response->getBody()->write('!');
+                return $response;
             },
-            function ($req, ResponseInterface $res, callable $next) {
-                $res->getBody()->write(' world');
-                return $next($req, $res);
+            function (ServerRequestInterface $request, callable $next) {
+                $response = $next($request);
+                $response->getBody()->write(' world');
+                return $response;
             },
         ]);
 
-        $response = $pipe->__invoke(new ServerRequest, new Response, $leaf);
+        $response = $pipe->__invoke(new ServerRequest, $leaf);
 
-        $this->assertEquals('Hello world!', $response->getBody());
+        $this->assertEquals('Hello world!', $response->getBody()->__toString());
     }
 
     /**
@@ -43,20 +43,21 @@ class PipeTest extends \PHPUnit_Framework_TestCase
      */
     public function accepts_custom_invoker()
     {
-        $leaf = function ($req, ResponseInterface $res) {
-            $res->getBody()->write('!');
-            return $res;
+        $leaf = function () {
+            return new SimpleResponse('Hello');
         };
 
         // The fake invoker passes the middleware parameters in the reverse order (for testing)
         $invoker = new FakeInvoker([
-            'first'  => function (callable $next, ResponseInterface $response, ServerRequestInterface $request) {
-                $response->getBody()->write('Hello');
-                return $next($request, $response);
+            'first' => function (callable $next, ServerRequestInterface $request) {
+                $response = $next($request);
+                $response->getBody()->write('!');
+                return $response;
             },
-            'second' => function (callable $next, ResponseInterface $response, ServerRequestInterface $request) {
+            'second' => function (callable $next, ServerRequestInterface $request) {
+                $response = $next($request);
                 $response->getBody()->write(' world');
-                return $next($request, $response);
+                return $response;
             },
         ]);
 
@@ -65,8 +66,8 @@ class PipeTest extends \PHPUnit_Framework_TestCase
             'second',
         ], $invoker);
 
-        $response = $pipe->__invoke(new ServerRequest, new Response, $leaf);
+        $response = $pipe->__invoke(new ServerRequest, $leaf);
 
-        $this->assertEquals('Hello world!', $response->getBody());
+        $this->assertEquals('Hello world!', $response->getBody()->__toString());
     }
 }

@@ -24,10 +24,5 @@ interface MiddlewareInvoker
      * The $middleware doesn't have to be callable.
      * That allows to resolve it from a container.
      */
-    public function invoke(
-        $middleware,
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        callable $next
-    ) : ResponseInterface;
+    public function invoke($middleware, ServerRequestInterface $request, callable $next) : ResponseInterface;
 }

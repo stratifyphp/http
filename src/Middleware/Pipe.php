@@ -33,19 +33,15 @@ class Pipe implements Middleware
         $this->invoker = $invoker ?: new SimpleInvoker;
     }
 
-    public function __invoke(
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        callable $next
-    ) : ResponseInterface
+    public function __invoke(ServerRequestInterface $request, callable $next) : ResponseInterface
     {
         foreach (array_reverse($this->middlewares) as $middleware) {
-            $next = function (ServerRequestInterface $request, ResponseInterface $response) use ($middleware, $next) {
-                return $this->invoker->invoke($middleware, $request, $response, $next);
+            $next = function (ServerRequestInterface $request) use ($middleware, $next) {
+                return $this->invoker->invoke($middleware, $request, $next);
             };
         }
 
         // Invoke the root middleware
-        return $next($request, $response);
+        return $next($request);
     }
 }

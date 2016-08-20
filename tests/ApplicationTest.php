@@ -3,9 +3,9 @@ declare(strict_types = 1);
 
 namespace Stratify\Http\Test;
 
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Application;
+use Stratify\Http\Response\SimpleResponse;
 use Stratify\Http\Test\Mock\FakeEmitter;
 use Stratify\Http\Test\Mock\FakeInvoker;
 
@@ -16,9 +16,8 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
      */
     public function runs_and_emits_the_response()
     {
-        $middleware = function (ServerRequestInterface $req, ResponseInterface $res, callable $next) {
-            $res->getBody()->write('Hello world!');
-            return $res;
+        $middleware = function (ServerRequestInterface $request, callable $next) {
+            return new SimpleResponse('Hello world!');
         };
 
         $responseEmitter = new FakeEmitter;
@@ -36,9 +35,8 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
         /** @var ServerRequestInterface $request */
         $request = $this->getMockForAbstractClass('Psr\Http\Message\ServerRequestInterface');
 
-        $middleware = function (ServerRequestInterface $req, ResponseInterface $res, callable $next) {
-            $res->getBody()->write('Hello world!');
-            return $res;
+        $middleware = function (ServerRequestInterface $request, callable $next) {
+            return new SimpleResponse('Hello world!');
         };
 
         $app = new Application($middleware, null, new FakeEmitter);
@@ -53,9 +51,8 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
     {
         $invoker = new FakeInvoker([
             // parameters are reversed in FakeInvoker
-            'foo' => function (callable $next, ResponseInterface $res, ServerRequestInterface $req) {
-                $res->getBody()->write('Hello world!');
-                return $res;
+            'foo' => function (callable $next, ServerRequestInterface $request) {
+                return new SimpleResponse('Hello world!');
             },
         ]);
 
