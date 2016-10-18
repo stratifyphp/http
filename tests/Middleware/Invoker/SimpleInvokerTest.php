@@ -3,7 +3,9 @@ declare(strict_types = 1);
 
 namespace Stratify\Http\Test\Middleware\Invoker;
 
+use Interop\Http\Middleware\DelegateInterface;
 use Stratify\Http\Middleware\Invoker\SimpleInvoker;
+use Stratify\Http\Middleware\LastHandler;
 use Zend\Diactoros\Response\EmptyResponse;
 use Zend\Diactoros\ServerRequest;
 
@@ -25,13 +27,13 @@ class SimpleInvokerTest extends \PHPUnit_Framework_TestCase
 
             $this->assertCount(2, $args);
             $this->assertSame($request, $args[0]);
-            $this->assertTrue(is_callable($args[1]));
+            $this->assertInstanceOf(DelegateInterface::class, $args[1]);
 
             return $expectedResponse;
         };
 
         $invoker = new SimpleInvoker;
-        $actualResponse = $invoker->invoke($callable, $request, function () {});
+        $actualResponse = $invoker->invoke($callable, $request, new LastHandler);
 
         $this->assertEquals(1, $calls);
         $this->assertSame($expectedResponse, $actualResponse);

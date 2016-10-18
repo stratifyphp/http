@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Stratify\Http\Middleware\Invoker;
 
+use Interop\Http\Middleware\DelegateInterface;
+use Interop\Http\Middleware\ServerMiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -14,12 +16,24 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class SimpleInvoker implements MiddlewareInvoker
 {
-    public function invoke($middleware, ServerRequestInterface $request, callable $next) : ResponseInterface
+    public function invoke(
+        $middleware,
+        ServerRequestInterface $request,
+        DelegateInterface $delegate
+    ) : ResponseInterface
     {
+        if ($middleware instanceof ServerMiddlewareInterface) {
+            $response = $middleware->process($request, $delegate);
+            if (!$response instanceof ResponseInterface) {
+                throw new \Exception('The middleware did not return a response');
+            }
+            return $response;
+        }
+
         if (! is_callable($middleware)) {
             throw new \Exception('The middleware is not callable');
         }
 
-        return call_user_func($middleware, $request, $next);
+        return call_user_func($middleware, $request, $delegate);
     }
 }

@@ -3,11 +3,13 @@ declare(strict_types = 1);
 
 namespace Stratify\Http;
 
+use Interop\Http\Middleware\DelegateInterface;
+use Interop\Http\Middleware\ServerMiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Stratify\Http\Exception\HttpNotFound;
 use Stratify\Http\Middleware\Invoker\MiddlewareInvoker;
 use Stratify\Http\Middleware\Invoker\SimpleInvoker;
+use Stratify\Http\Middleware\LastHandler;
 use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
@@ -17,7 +19,7 @@ use Zend\Diactoros\ServerRequestFactory;
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class Application
+class Application implements ServerMiddlewareInterface
 {
     /**
      * @var mixed
@@ -50,25 +52,22 @@ class Application
     {
         $request = $request ?: ServerRequestFactory::fromGlobals();
 
-        $response = $this->handle($request);
+        $response = $this->process($request);
 
         $this->responseEmitter->emit($response);
     }
 
     /**
-     * Handle the given HTTP request and returns an HTTP response.
+     * Process the given HTTP request and returns an HTTP response.
      *
      * Unlike run() this method doesn't write anything to the output. Use it in tests.
      *
      * @see run() for a more high-level method.
      */
-    public function handle(ServerRequestInterface $request) : ResponseInterface
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate = null) : ResponseInterface
     {
-        // Leaf middleware: resource not found
-        $leaf = function () {
-            throw new HttpNotFound;
-        };
+        $delegate = $delegate ?: new LastHandler;
 
-        return $this->invoker->invoke($this->middleware, $request, $leaf);
+        return $this->invoker->invoke($this->middleware, $request, $delegate);
     }
 }

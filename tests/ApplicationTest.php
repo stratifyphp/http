@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace Stratify\Http\Test;
 
+use Interop\Http\Middleware\DelegateInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Application;
 use Stratify\Http\Response\SimpleResponse;
@@ -16,7 +17,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
      */
     public function runs_and_emits_the_response()
     {
-        $middleware = function (ServerRequestInterface $request, callable $next) {
+        $middleware = function (ServerRequestInterface $request, DelegateInterface $delegate) {
             return new SimpleResponse('Hello world!');
         };
 
@@ -35,12 +36,12 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
         /** @var ServerRequestInterface $request */
         $request = $this->getMockForAbstractClass('Psr\Http\Message\ServerRequestInterface');
 
-        $middleware = function (ServerRequestInterface $request, callable $next) {
+        $middleware = function (ServerRequestInterface $request, DelegateInterface $delegate) {
             return new SimpleResponse('Hello world!');
         };
 
         $app = new Application($middleware, null, new FakeEmitter);
-        $response = $app->handle($request);
+        $response = $app->process($request);
         $this->assertEquals('Hello world!', $response->getBody()->__toString());
     }
 
@@ -51,7 +52,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
     {
         $invoker = new FakeInvoker([
             // parameters are reversed in FakeInvoker
-            'foo' => function (callable $next, ServerRequestInterface $request) {
+            'foo' => function (DelegateInterface $delegate, ServerRequestInterface $request) {
                 return new SimpleResponse('Hello world!');
             },
         ]);

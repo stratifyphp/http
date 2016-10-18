@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Stratify\Http\Middleware\Invoker;
 
+use Interop\Http\Middleware\DelegateInterface;
+use Interop\Http\Middleware\ServerMiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -23,6 +25,12 @@ interface MiddlewareInvoker
      *
      * The $middleware doesn't have to be callable.
      * That allows to resolve it from a container.
+     * 
+     * @param ServerMiddlewareInterface|callable|mixed $middleware
      */
-    public function invoke($middleware, ServerRequestInterface $request, callable $next) : ResponseInterface;
+    public function invoke(
+        $middleware,
+        ServerRequestInterface $request,
+        DelegateInterface $delegate
+    ) : ResponseInterface;
 }
