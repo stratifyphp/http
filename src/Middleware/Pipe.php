@@ -3,7 +3,8 @@ declare(strict_types = 1);
 
 namespace Stratify\Http\Middleware;
 
-use Psr\Http\Message\ResponseInterface;
+use Interop\Http\Middleware\DelegateInterface;
+use Interop\Http\Middleware\ServerMiddlewareInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Middleware\Invoker\MiddlewareInvoker;
 use Stratify\Http\Middleware\Invoker\SimpleInvoker;
@@ -15,10 +16,10 @@ use Stratify\Http\Middleware\Invoker\SimpleInvoker;
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class Pipe implements Middleware
+class Pipe implements ServerMiddlewareInterface
 {
     /**
-     * @var Middleware[]
+     * @var ServerMiddlewareInterface[]|mixed[]
      */
     private $middlewares;
 
@@ -33,15 +34,15 @@ class Pipe implements Middleware
         $this->invoker = $invoker ?: new SimpleInvoker;
     }
 
-    public function __invoke(ServerRequestInterface $request, callable $next) : ResponseInterface
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
+        $next = $delegate;
+
         foreach (array_reverse($this->middlewares) as $middleware) {
-            $next = function (ServerRequestInterface $request) use ($middleware, $next) {
-                return $this->invoker->invoke($middleware, $request, $next);
-            };
+            $next = new DelegateToMiddleware($this->invoker, $middleware, $next);
         }
 
         // Invoke the root middleware
-        return $next($request);
+        return $next->process($request);
     }
 }
