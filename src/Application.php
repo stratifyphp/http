@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Stratify\Http;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Middleware\Invoker\MiddlewareInvoker;
@@ -15,9 +17,11 @@ use Zend\Diactoros\ServerRequestFactory;
 /**
  * An HTTP application emits a response for the current request.
  *
+ * Note that the application is also a middleware.
+ *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class Application
+class Application implements MiddlewareInterface
 {
     /**
      * @var mixed
@@ -64,9 +68,11 @@ class Application
      */
     public function handle(ServerRequestInterface $request) : ResponseInterface
     {
-        // Leaf middleware: resource not found
-        $leaf = new LastDelegate;
+        return $this->process($request, new LastDelegate);
+    }
 
-        return $this->invoker->invoke($this->middleware, $request, $leaf);
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate) : ResponseInterface
+    {
+        return $this->invoker->invoke($this->middleware, $request, $delegate);
     }
 }

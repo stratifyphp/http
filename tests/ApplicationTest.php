@@ -83,4 +83,12 @@ class ApplicationTest extends TestCase
 
         $this->assertEquals('Hello world!', $responseEmitter->output);
     }
+
+    /**
+     * @test
+     */
+    public function is_a_middleware()
+    {
+        $this->assertInstanceOf(MiddlewareInterface::class, new Application(''));
+    }
 }
