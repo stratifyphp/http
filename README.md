@@ -1,17 +1,35 @@
 # Stratify HTTP stack
 
-HTTP middleware utilities built upon PSR-7 and [Zend Diactoros](https://github.com/zendframework/zend-diactoros) as the PSR-7 implementation.
+HTTP middleware utilities built upon:
+
+- PSR-7 and [Zend Diactoros](https://github.com/zendframework/zend-diactoros) as the implementation
+- [http-interop/http-middleware](https://github.com/http-interop/http-middleware) for middlewares
 
 ```
 composer require stratify/http
 ```
 
-## Middleware
+## Middlewares
+
+A middleware can be either an instance of `Interop\Http\ServerMiddleware\MiddlewareInterface`:
 
 ```php
-interface Middleware
+class MyMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInterface
 {
-    public function __invoke(ServerRequestInterface $request, callable $next) : ResponseInterface;
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate) : ResponseInterface
+    {
+        return new Response(...);
+    }
+}
+
+$middleware = new MyMiddleware;
+```
+
+or a simple callable, which allows to use closures for quickly writing middlewares:
+
+```php
+$middleware = function(ServerRequestInterface $request, DelegateInterface $delegate) : ResponseInterface {
+    return new Response(...);
 }
 ```
 
@@ -31,7 +49,13 @@ $middleware = new Pipe([
 ]);
 
 // Run
-$response = $middleware($request, $next);
+$response = $middleware->process($request, $delegate);
 ```
 
 The pipe will first execute `Middleware1`. If that middleware calls `$next` then `Middleware2` will be executed. An infinite number of middlewares can be piped together.
+
+If you don't need to use the `$delegate` argument for the pipe, you can use the `LastDelegate` class:
+
+```php
+$response = $middleware->process($request, new \Stratify\Http\Middleware\LastDelegate);
+```

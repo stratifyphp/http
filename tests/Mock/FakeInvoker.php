@@ -1,8 +1,9 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Stratify\Http\Test\Mock;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Stratify\Http\Middleware\Invoker\MiddlewareInvoker;
@@ -19,9 +20,12 @@ class FakeInvoker implements MiddlewareInvoker
         $this->entries = $entries;
     }
 
-    public function invoke($middleware, ServerRequestInterface $request, callable $next) : ResponseInterface
-    {
+    public function invoke(
+        $middleware,
+        ServerRequestInterface $request,
+        DelegateInterface $delegate
+    ) : ResponseInterface {
         // Calls with the parameters reversed
-        return call_user_func($this->entries[$middleware], $next, $request);
+        return call_user_func($this->entries[$middleware], $delegate, $request);
     }
 }

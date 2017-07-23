@@ -1,8 +1,10 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Stratify\Http\Middleware\Invoker;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -21,8 +23,12 @@ interface MiddlewareInvoker
     /**
      * Invokes the given middleware using the provided parameters.
      *
-     * The $middleware doesn't have to be callable.
-     * That allows to resolve it from a container.
+     * @param MiddlewareInterface|callable|string|array $middleware The middleware doesn't have to be callable.
+     *                                                              That allows to resolve it from a container.
      */
-    public function invoke($middleware, ServerRequestInterface $request, callable $next) : ResponseInterface;
+    public function invoke(
+        $middleware,
+        ServerRequestInterface $request,
+        DelegateInterface $delegate
+    ) : ResponseInterface;
 }
