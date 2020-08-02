@@ -2,7 +2,7 @@
 
 HTTP middleware utilities built upon:
 
-- PSR-7 and [Zend Diactoros](https://github.com/zendframework/zend-diactoros) as the implementation
+- PSR-7 and [Diactoros](https://docs.laminas.dev/laminas-diactoros/) as the implementation
 - [PSR-15](https://www.php-fig.org/psr/psr-15/)
 
 ```
