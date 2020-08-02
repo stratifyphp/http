@@ -3,7 +3,7 @@
 HTTP middleware utilities built upon:
 
 - PSR-7 and [Zend Diactoros](https://github.com/zendframework/zend-diactoros) as the implementation
-- [http-interop/http-middleware](https://github.com/http-interop/http-middleware) for middlewares
+- [PSR-15](https://www.php-fig.org/psr/psr-15/)
 
 ```
 composer require stratify/http
@@ -11,7 +11,7 @@ composer require stratify/http
 
 ## Middlewares
 
-A middleware can be either an instance of `Interop\Http\ServerMiddleware\MiddlewareInterface`:
+A middleware can be either an instance of `Psr\Http\Server\MiddlewareInterface`:
 
 ```php
 class MyMiddleware implements \Psr\Http\Server\MiddlewareInterface

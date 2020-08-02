@@ -61,7 +61,7 @@ class SimpleInvokerTest extends TestCase
     /**
      * @test
      */
-    public function invokes_interop_middlewares()
+    public function invokes_psr15_middlewares()
     {
         $middleware = new class() implements MiddlewareInterface {
             public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface

@@ -34,7 +34,7 @@ class ApplicationTest extends TestCase
     /**
      * @test
      */
-    public function accepts_interop_middlewares()
+    public function accepts_psr15_middlewares()
     {
         $middleware = new class() implements MiddlewareInterface {
             public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
