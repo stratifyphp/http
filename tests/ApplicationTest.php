@@ -3,12 +3,13 @@ declare(strict_types = 1);
 
 namespace Stratify\Http\Test;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Stratify\Http\Application;
-use Stratify\Http\Response\SimpleResponse;
+use Stratify\Http\Test\TestResponse;
 use Stratify\Http\Test\Mock\FakeEmitter;
 use Stratify\Http\Test\Mock\FakeInvoker;
 
@@ -19,8 +20,8 @@ class ApplicationTest extends TestCase
      */
     public function runs_and_emits_the_response()
     {
-        $middleware = function (ServerRequestInterface $request, DelegateInterface $delegate) {
-            return new SimpleResponse('Hello world!');
+        $middleware = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return new TestResponse('Hello world!');
         };
 
         $responseEmitter = new FakeEmitter;
@@ -36,9 +37,9 @@ class ApplicationTest extends TestCase
     public function accepts_interop_middlewares()
     {
         $middleware = new class() implements MiddlewareInterface {
-            public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
             {
-                return new SimpleResponse('Hello world!');
+                return new TestResponse('Hello world!');
             }
         };
 
@@ -56,8 +57,8 @@ class ApplicationTest extends TestCase
     {
         $request = $this->getMockForAbstractClass(ServerRequestInterface::class);
 
-        $middleware = function (ServerRequestInterface $request, DelegateInterface $delegate) {
-            return new SimpleResponse('Hello world!');
+        $middleware = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return new TestResponse('Hello world!');
         };
 
         $app = new Application($middleware, null, new FakeEmitter);
@@ -72,8 +73,8 @@ class ApplicationTest extends TestCase
     {
         $invoker = new FakeInvoker([
             // parameters are reversed in FakeInvoker
-            'foo' => function (DelegateInterface $delegate, ServerRequestInterface $request) {
-                return new SimpleResponse('Hello world!');
+            'foo' => function (RequestHandlerInterface $handler, ServerRequestInterface $request) {
+                return new TestResponse('Hello world!');
             },
         ]);
 

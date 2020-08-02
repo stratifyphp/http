@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Stratify\Http\Middleware\Invoker;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * Invokes a middleware.
@@ -15,8 +15,6 @@ use Psr\Http\Message\ServerRequestInterface;
  *
  * - resolve middlewares from a DI container (or any other source)
  * - invoke the callables with different parameters (e.g. dependency injection in parameters)
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 interface MiddlewareInvoker
 {
@@ -29,6 +27,6 @@ interface MiddlewareInvoker
     public function invoke(
         $middleware,
         ServerRequestInterface $request,
-        DelegateInterface $delegate
+        RequestHandlerInterface $handler
     ) : ResponseInterface;
 }

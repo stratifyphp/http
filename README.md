@@ -14,9 +14,9 @@ composer require stratify/http
 A middleware can be either an instance of `Interop\Http\ServerMiddleware\MiddlewareInterface`:
 
 ```php
-class MyMiddleware implements \Interop\Http\ServerMiddleware\MiddlewareInterface
+class MyMiddleware implements \Psr\Http\Server\MiddlewareInterface
 {
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate) : ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
         return new Response(...);
     }
@@ -28,7 +28,7 @@ $middleware = new MyMiddleware;
 or a simple callable, which allows to use closures for quickly writing middlewares:
 
 ```php
-$middleware = function(ServerRequestInterface $request, DelegateInterface $delegate) : ResponseInterface {
+$middleware = function(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface {
     return new Response(...);
 }
 ```
@@ -49,13 +49,13 @@ $middleware = new Pipe([
 ]);
 
 // Run
-$response = $middleware->process($request, $delegate);
+$response = $middleware->process($request, $handler);
 ```
 
 The pipe will first execute `Middleware1`. If that middleware calls `$next` then `Middleware2` will be executed. An infinite number of middlewares can be piped together.
 
-If you don't need to use the `$delegate` argument for the pipe, you can use the `LastDelegate` class:
+If you don't need to use the `$handler` argument for the pipe, you can use the `LastHandler` class:
 
 ```php
-$response = $middleware->process($request, new \Stratify\Http\Middleware\LastDelegate);
+$response = $middleware->process($request, new \Stratify\Http\Middleware\LastHandler);
 ```

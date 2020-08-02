@@ -3,46 +3,36 @@ declare(strict_types = 1);
 
 namespace Stratify\Http;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
+use Laminas\Diactoros\ServerRequestFactory;
+use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
+use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Stratify\Http\Middleware\Invoker\MiddlewareInvoker;
 use Stratify\Http\Middleware\Invoker\SimpleInvoker;
-use Stratify\Http\Middleware\LastDelegate;
-use Zend\Diactoros\Response\EmitterInterface;
-use Zend\Diactoros\Response\SapiEmitter;
-use Zend\Diactoros\ServerRequestFactory;
+use Stratify\Http\Middleware\LastHandler;
 
 /**
  * An HTTP application emits a response for the current request.
  *
  * Note that the application is also a middleware.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class Application implements MiddlewareInterface
+class Application implements MiddlewareInterface, RequestHandlerInterface
 {
-    /**
-     * @var mixed
-     */
+    /** @var mixed */
     private $middleware;
 
-    /**
-     * @var MiddlewareInvoker
-     */
-    private $invoker;
+    private MiddlewareInvoker $invoker;
 
-    /**
-     * @var EmitterInterface
-     */
-    private $responseEmitter;
+    private EmitterInterface $responseEmitter;
 
     public function __construct($middleware, MiddlewareInvoker $invoker = null, EmitterInterface $responseEmitter = null)
     {
         $this->middleware = $middleware;
         $this->invoker = $invoker ?: new SimpleInvoker;
-        $this->responseEmitter = $responseEmitter ?: new SapiEmitter();
+        $this->responseEmitter = $responseEmitter ?: new SapiEmitter;
     }
 
     /**
@@ -50,7 +40,7 @@ class Application implements MiddlewareInterface
      *
      * @see handle() to handle an HTTP request and not write the response to the output.
      */
-    public function run(ServerRequestInterface $request = null)
+    public function run(ServerRequestInterface $request = null): void
     {
         $request = $request ?: ServerRequestFactory::fromGlobals();
 
@@ -68,11 +58,11 @@ class Application implements MiddlewareInterface
      */
     public function handle(ServerRequestInterface $request) : ResponseInterface
     {
-        return $this->process($request, new LastDelegate);
+        return $this->process($request, new LastHandler);
     }
 
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate) : ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        return $this->invoker->invoke($this->middleware, $request, $delegate);
+        return $this->invoker->invoke($this->middleware, $request, $handler);
     }
 }

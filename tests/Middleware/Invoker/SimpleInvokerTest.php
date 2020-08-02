@@ -3,15 +3,16 @@ declare(strict_types = 1);
 
 namespace Stratify\Http\Test\Middleware\Invoker;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
+use Laminas\Diactoros\Response\EmptyResponse;
+use Laminas\Diactoros\ServerRequest;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Stratify\Http\Middleware\Invoker\SimpleInvoker;
-use Stratify\Http\Middleware\LastDelegate;
-use Stratify\Http\Response\SimpleResponse;
-use Zend\Diactoros\Response\EmptyResponse;
-use Zend\Diactoros\ServerRequest;
+use Stratify\Http\Middleware\LastHandler;
+use Stratify\Http\Test\TestResponse;
 
 class SimpleInvokerTest extends TestCase
 {
@@ -31,13 +32,13 @@ class SimpleInvokerTest extends TestCase
 
             $this->assertCount(2, $args);
             $this->assertSame($request, $args[0]);
-            $this->assertInstanceOf(DelegateInterface::class, $args[1]);
+            $this->assertInstanceOf(RequestHandlerInterface::class, $args[1]);
 
             return $expectedResponse;
         };
 
         $invoker = new SimpleInvoker;
-        $actualResponse = $invoker->invoke($callable, $request, new LastDelegate);
+        $actualResponse = $invoker->invoke($callable, $request, new LastHandler);
 
         $this->assertEquals(1, $calls);
         $this->assertSame($expectedResponse, $actualResponse);
@@ -49,10 +50,10 @@ class SimpleInvokerTest extends TestCase
     public function invokes_callable_middlewares()
     {
         $middleware = function () {
-            return new SimpleResponse('Hello world!');
+            return new TestResponse('Hello world!');
         };
 
-        $response = (new SimpleInvoker)->invoke($middleware, new ServerRequest, new LastDelegate);
+        $response = (new SimpleInvoker)->invoke($middleware, new ServerRequest, new LastHandler);
 
         $this->assertEquals('Hello world!', $response->getBody()->__toString());
     }
@@ -63,13 +64,13 @@ class SimpleInvokerTest extends TestCase
     public function invokes_interop_middlewares()
     {
         $middleware = new class() implements MiddlewareInterface {
-            public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
             {
-                return new SimpleResponse('Hello world!');
+                return new TestResponse('Hello world!');
             }
         };
 
-        $response = (new SimpleInvoker)->invoke($middleware, new ServerRequest, new LastDelegate);
+        $response = (new SimpleInvoker)->invoke($middleware, new ServerRequest, new LastHandler);
 
         $this->assertEquals('Hello world!', $response->getBody()->__toString());
     }

@@ -3,34 +3,31 @@ declare(strict_types = 1);
 
 namespace Stratify\Http\Test\Middleware;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
+use Laminas\Diactoros\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Stratify\Http\Middleware\Pipe;
-use Stratify\Http\Response\SimpleResponse;
+use Stratify\Http\Test\TestResponse;
 use Stratify\Http\Test\Mock\FakeInvoker;
-use Stratify\Http\Test\Mock\FakeLastDelegate;
-use Zend\Diactoros\ServerRequest;
+use Stratify\Http\Test\Mock\FakeLastHandler;
 
 class PipeTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function calls_middlewares_in_correct_order()
+    public function test calls middlewares in correct order()
     {
-        $leaf = new FakeLastDelegate(function () {
-            return new SimpleResponse('Hello');
+        $leaf = new FakeLastHandler(function () {
+            return new TestResponse('Hello');
         });
 
         $pipe = new Pipe([
-            function (ServerRequestInterface $request, DelegateInterface $delegate) {
-                $response = $delegate->process($request);
+            function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+                $response = $handler->handle($request);
                 $response->getBody()->write('!');
                 return $response;
             },
-            function (ServerRequestInterface $request, DelegateInterface $delegate) {
-                $response = $delegate->process($request);
+            function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+                $response = $handler->handle($request);
                 $response->getBody()->write(' world');
                 return $response;
             },
@@ -46,19 +43,19 @@ class PipeTest extends TestCase
      */
     public function accepts_custom_invoker()
     {
-        $leaf = new FakeLastDelegate(function () {
-            return new SimpleResponse('Hello');
+        $leaf = new FakeLastHandler(function () {
+            return new TestResponse('Hello');
         });
 
         // The fake invoker passes the middleware parameters in the reverse order (for testing)
         $invoker = new FakeInvoker([
-            'first' => function (DelegateInterface $delegate, ServerRequestInterface $request) {
-                $response = $delegate->process($request);
+            'first' => function (RequestHandlerInterface $handler, ServerRequestInterface $request) {
+                $response = $handler->handle($request);
                 $response->getBody()->write('!');
                 return $response;
             },
-            'second' => function (DelegateInterface $delegate, ServerRequestInterface $request) {
-                $response = $delegate->process($request);
+            'second' => function (RequestHandlerInterface $handler, ServerRequestInterface $request) {
+                $response = $handler->handle($request);
                 $response->getBody()->write(' world');
                 return $response;
             },

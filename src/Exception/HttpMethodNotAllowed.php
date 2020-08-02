@@ -5,8 +5,6 @@ namespace Stratify\Http\Exception;
 
 /**
  * HTTP exception: 405 method not allowed.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 class HttpMethodNotAllowed extends HttpException
 {

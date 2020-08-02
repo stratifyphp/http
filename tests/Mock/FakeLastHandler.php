@@ -3,14 +3,13 @@ declare(strict_types=1);
 
 namespace Stratify\Http\Test\Mock;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
-class FakeLastDelegate implements DelegateInterface
+class FakeLastHandler implements RequestHandlerInterface
 {
-    /**
-     * @var callable
-     */
+    /** @var callable */
     private $action;
 
     public function __construct(callable $action)
@@ -18,7 +17,7 @@ class FakeLastDelegate implements DelegateInterface
         $this->action = $action;
     }
 
-    public function process(ServerRequestInterface $request)
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         return ($this->action)($request);
     }

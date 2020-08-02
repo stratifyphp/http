@@ -3,30 +3,23 @@ declare(strict_types=1);
 
 namespace Stratify\Http\Middleware;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Stratify\Http\Middleware\Invoker\MiddlewareInvoker;
 
 /**
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class MiddlewareInvokerDelegate implements DelegateInterface
+class MiddlewareInvokerDelegate implements RequestHandlerInterface
 {
-    /**
-     * @var MiddlewareInvoker
-     */
-    private $invoker;
+    private MiddlewareInvoker $invoker;
 
-    /**
-     * @var MiddlewareInterface|callable|string|array
-     */
+    /** @var MiddlewareInterface|callable|string|array */
     private $middleware;
 
-    /**
-     * @var DelegateInterface
-     */
-    private $nextDelegate;
+    private RequestHandlerInterface $handler;
 
     /**
      * @param MiddlewareInterface|callable|string|array $middleware The middleware doesn't have to be callable.
@@ -35,15 +28,15 @@ class MiddlewareInvokerDelegate implements DelegateInterface
     public function __construct(
         MiddlewareInvoker $invoker,
         $middleware,
-        DelegateInterface $nextDelegate
+        RequestHandlerInterface $handler
     ) {
         $this->invoker = $invoker;
         $this->middleware = $middleware;
-        $this->nextDelegate = $nextDelegate;
+        $this->handler = $handler;
     }
 
-    public function process(ServerRequestInterface $request)
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        return $this->invoker->invoke($this->middleware, $request, $this->nextDelegate);
+        return $this->invoker->invoke($this->middleware, $request, $this->handler);
     }
 }

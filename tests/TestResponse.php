@@ -1,11 +1,11 @@
 <?php
 declare(strict_types = 1);
 
-namespace Stratify\Http\Response;
+namespace Stratify\Http\Test;
 
-use Zend\Diactoros\Response;
-use Zend\Diactoros\Response\InjectContentTypeTrait;
-use Zend\Diactoros\Stream;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\Response\InjectContentTypeTrait;
+use Laminas\Diactoros\Stream;
 
 /**
  * Simple plain text response to use when testing middlewares.
@@ -14,10 +14,8 @@ use Zend\Diactoros\Stream;
  * allowing to easily write new content to the body.
  *
  * That is mostly useful to test middlewares.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class SimpleResponse extends Response
+class TestResponse extends Response
 {
     use InjectContentTypeTrait;
 
